@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>보건복지부 보도자료 검색</title>
+<style>
+:root{
+  --navy:#1E293B;--navy2:#0F172A;--blue:#0EA5E9;--blue-lt:#E0F2FE;
+  --gold:#0EA5E9;--gold-lt:#E0F2FE;--bg:#F8FAFC;--bg2:#fff;
+  --ink:#0F172A;--ink2:#475569;--ink3:#94A3B8;
+  --border:rgba(0,0,0,0.08);--shadow:0 2px 12px rgba(0,0,0,0.07);--r:8px;
+  --font:'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6}
+
+/* 헤더 */
+header{background:var(--navy);color:#fff;padding:0 24px}
+.header-inner{max-width:1080px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:56px}
+.logo{display:flex;align-items:center;gap:10px}
+
+.logo-text{font-size:15px;font-weight:600;letter-spacing:-.3px;color:#F1F5F9}
+.logo-sub{font-size:11px;color:#94A3B8;margin-top:1px}
+.header-count{font-size:11px;color:#94A3B8}
+
+/* 검색창 */
+.search-wrap{background:var(--navy2);padding:24px 24px 26px}
+.search-inner{max-width:1080px;margin:0 auto}
+.search-box{display:flex;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.18)}
+.search-input{flex:1;padding:15px 20px;font-size:17px;font-family:var(--font);border:none;outline:none;color:var(--ink);background:transparent}
+.search-input::placeholder{color:var(--ink3)}
+.search-btn{background:var(--gold);color:#fff;border:none;padding:0 28px;font-size:15px;font-family:var(--font);font-weight:600;cursor:pointer;transition:background .15s}
+.search-btn:hover{background:#0284C7}
+.search-hint{margin-top:14px}
+.search-hint-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px 20px}
+.sh-item{display:flex;align-items:flex-start;gap:7px;font-size:13px;color:#CBD5E1;line-height:1.5}
+.sh-dot{width:5px;height:5px;border-radius:50%;background:#38BDF8;flex-shrink:0;margin-top:6px}
+.sh-em{color:#94A3B8;font-size:12px;margin-top:2px}
+
+/* 필터 패널 */
+.filter-panel{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+.filter-panel-inner{max-width:1080px;margin:0 auto;padding:0 24px}
+
+/* 탭 */
+.filter-tabs{display:flex;border-bottom:1px solid var(--border);gap:0}
+.ftab{padding:11px 16px;font-size:12.5px;font-family:var(--font);border:none;background:transparent;cursor:pointer;color:var(--ink3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.ftab.active{color:var(--navy);font-weight:600;border-bottom-color:var(--navy)}
+.ftab:hover:not(.active){color:var(--ink2)}
+
+/* 탭 콘텐츠 */
+.ftab-body{display:none;padding:10px 0 12px;align-items:center;gap:8px;flex-wrap:wrap}
+.ftab-body.active{display:flex}
+
+/* 연도 멀티 선택 */
+.year-grid{display:flex;flex-wrap:wrap;gap:5px}
+.year-btn{padding:4px 10px;border-radius:20px;font-size:12px;font-family:var(--font);border:1px solid var(--border);background:var(--bg);cursor:pointer;color:var(--ink2);transition:all .12s;white-space:nowrap}
+.year-btn:hover{border-color:var(--blue);color:var(--blue)}
+.year-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.year-btn.all-btn{background:var(--navy);color:#fff;border-color:var(--navy)}
+.year-btn.all-btn.inactive{background:var(--bg);color:var(--ink2);border-color:var(--border)}
+.filter-clear{font-size:12px;color:var(--blue);background:none;border:none;cursor:pointer;padding:4px 8px;font-family:var(--font);text-decoration:underline}
+
+/* 기간 설정 */
+.range-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.range-label{font-size:12px;color:var(--ink3);white-space:nowrap}
+.range-select{font-size:12.5px;font-family:var(--font);border:1px solid var(--border);border-radius:6px;padding:5px 10px;background:#fff;color:var(--ink);cursor:pointer;outline:none}
+.range-select:focus{border-color:var(--blue)}
+.range-dash{font-size:13px;color:var(--ink3)}
+.range-apply{font-size:12.5px;font-family:var(--font);padding:5px 16px;background:var(--navy);color:#fff;border:none;border-radius:6px;cursor:pointer;transition:background .15s}
+.range-apply:hover{background:#0F172A}
+.range-reset{font-size:12px;color:var(--ink3);background:none;border:none;cursor:pointer;font-family:var(--font);text-decoration:underline;padding:5px 4px}
+
+/* 현재 필터 표시 */
+.active-filter-bar{background:var(--blue-lt);padding:6px 24px;font-size:11.5px;color:var(--blue);display:none;align-items:center;gap:8px}
+.active-filter-bar.show{display:flex}
+.afc-clear{background:none;border:none;color:var(--blue);cursor:pointer;font-size:11.5px;font-family:var(--font);text-decoration:underline;margin-left:auto}
+
+/* 결과 */
+.main{max-width:1080px;margin:0 auto;padding:18px 24px 60px}
+.result-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.result-count{font-size:13px;color:var(--ink2)}
+.result-count strong{color:var(--ink);font-weight:600}
+.sort-select{font-size:12px;font-family:var(--font);border:1px solid var(--border);border-radius:6px;padding:4px 10px;background:#fff;color:var(--ink2);cursor:pointer;outline:none}
+
+/* 카드 */
+.result-list{display:grid;gap:9px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:15px 17px;transition:box-shadow .15s,transform .1s}
+.card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.card-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:7px}
+.card-date{font-size:11px;color:var(--ink3);white-space:nowrap;margin-top:3px;flex-shrink:0}
+.card-title{font-size:14.5px;font-weight:600;color:var(--ink);line-height:1.45;flex:1}
+.card-title mark{background:var(--gold-lt);color:var(--gold);border-radius:2px;padding:0 1px}
+.card-summary{font-size:12.5px;color:var(--ink2);line-height:1.6;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-summary mark{background:var(--blue-lt);color:var(--blue);border-radius:2px}
+.card-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card-keywords{display:flex;flex-wrap:wrap;gap:4px;flex:1;min-width:0}
+.kw{font-size:11px;color:var(--ink3);background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:2px 8px;white-space:nowrap}
+.kw.hit{color:var(--blue);background:var(--blue-lt);border-color:rgba(26,110,204,.2)}
+.card-link{flex-shrink:0;font-size:12px;color:var(--blue);text-decoration:none;padding:5px 12px;border:1px solid var(--blue);border-radius:20px;transition:all .15s;white-space:nowrap}
+.card-link:hover{background:var(--blue);color:#fff}
+
+/* 상태 박스 */
+.state-box{text-align:center;padding:56px 20px;color:var(--ink2)}
+.state-icon{font-size:38px;margin-bottom:10px;opacity:.4}
+.state-title{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:5px}
+.state-desc{font-size:13px}
+.progress-bar{width:220px;height:3px;background:var(--border);border-radius:2px;margin:14px auto 0;overflow:hidden}
+.progress-fill{height:100%;background:var(--blue);animation:prog 1.4s ease-in-out infinite}
+@keyframes prog{0%{width:0%;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0%;margin-left:100%}}
+
+/* 더보기 */
+.load-more-wrap{text-align:center;margin-top:22px}
+.load-more-btn{font-family:var(--font);font-size:13px;padding:10px 32px;border:1px solid var(--border);border-radius:24px;background:#fff;color:var(--ink2);cursor:pointer;transition:all .15s}
+.load-more-btn:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+@media(max-width:600px){
+  .search-wrap,.filter-panel-inner,.active-filter-bar,.main{padding-left:14px;padding-right:14px}
+  .search-input{font-size:15px;padding:12px 14px}
+  .search-btn{padding:0 16px;font-size:13px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div>
+        <div class="logo-text">보건복지부 보도자료 검색</div>
+        <div class="logo-sub">Ministry of Health and Welfare · 2000~2026</div>
+      </div>
+    </div>
+    <div class="header-count" id="headerCount">로딩 중...</div>
+  </div>
+</header>
+
+<div class="search-wrap">
+  <div class="search-inner">
+    <div class="search-box">
+      <input type="search" class="search-input" id="searchInput"
+        placeholder="검색어 예) 건강보험 본인부담  코로나19 격리  기초연금"
+        autocomplete="off" spellcheck="false">
+      <button class="search-btn" onclick="doSearch()">검색</button>
+    </div>
+    <div class="search-hint">
+      <div class="search-hint-grid">
+        <div class="sh-item"><div class="sh-dot"></div><div>
+          <div>제목 · 키워드 · 요약 통합 검색</div>
+          <div class="sh-em">검색어 예시: 건강보험료 인상 / 기초연금 수급자 / 코로나19 격리지원</div>
+        </div></div>
+        <div class="sh-item"><div class="sh-dot"></div><div>
+          <div>연도 복수 선택 및 연·월 기간 설정 지원</div>
+          <div class="sh-em">연도 탭: 2020·2021 동시 선택 가능 / 기간 탭: 2020년 1월~2022년 6월 범위 지정</div>
+        </div></div>
+        <div class="sh-item"><div class="sh-dot"></div><div>
+          <div>수록 기간: 2000년 1월 3일 ~ 2026년 3월 21일 (23,912건) / 매주 업데이트</div>
+          <div class="sh-em">문의: wanderingstone@gmail.com</div>
+        </div></div>
+        <div class="sh-item"><div class="sh-dot"></div><div>
+          <div>결과 카드의 원문 보기 클릭 시 보건복지부 홈페이지 원문 연결</div>
+          <div class="sh-em">비공식 서비스 / 원문 저작권은 보건복지부 소유</div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 필터 패널 -->
+<div class="filter-panel">
+  <div class="filter-panel-inner">
+    <div class="filter-tabs">
+      <button class="ftab active" onclick="switchTab('year')">연도 선택</button>
+      <button class="ftab" onclick="switchTab('range')">기간 설정</button>
+    </div>
+
+    <!-- 연도 멀티 선택 탭 -->
+    <div class="ftab-body active" id="tab-year">
+      <div class="year-grid" id="yearGrid">
+        <button class="year-btn all-btn" data-year="all" onclick="toggleYear('all')">전체</button>
+      </div>
+      <button class="filter-clear" id="yearClearBtn" onclick="clearYears()" style="display:none">선택 해제</button>
+    </div>
+
+    <!-- 기간 설정 탭 -->
+    <div class="ftab-body" id="tab-range">
+      <div class="range-row">
+        <span class="range-label">시작</span>
+        <select class="range-select" id="fromYear"></select>
+        <select class="range-select" id="fromMonth">
+          <option value="">월 전체</option>
+          <script>for(let m=1;m<=12;m++) document.write(`<option value="${String(m).padStart(2,'0')}">${m}월</option>`)</script>
+        </select>
+        <span class="range-dash">~</span>
+        <span class="range-label">종료</span>
+        <select class="range-select" id="toYear"></select>
+        <select class="range-select" id="toMonth">
+          <option value="">월 전체</option>
+          <script>for(let m=1;m<=12;m++) document.write(`<option value="${String(m).padStart(2,'0')}">${m}월</option>`)</script>
+        </select>
+        <button class="range-apply" onclick="applyRange()">적용</button>
+        <button class="range-reset" onclick="resetRange()">초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 현재 필터 표시 -->
+  <div class="active-filter-bar" id="activeFilterBar">
+    <span id="activeFilterText"></span>
+    <button class="afc-clear" onclick="clearAllFilters()">필터 해제</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="result-meta" id="resultMeta" style="display:none">
+    <div class="result-count" id="resultCount"></div>
+    <select class="sort-select" id="sortSelect" onchange="doSearch()">
+      <option value="date">최신순</option>
+      <option value="score">관련도순</option>
+    </select>
+  </div>
+  <div id="resultList" class="result-list"></div>
+  <div class="load-more-wrap" id="loadMoreWrap" style="display:none">
+    <button class="load-more-btn" id="loadMoreBtn" onclick="loadMore()">더 보기</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/7.0.0/fuse.min.js"></script>
+<script>
+const PAGE = 30;
+let allData = [], fuse = null;
+let currentResults = [], displayedCount = 0;
+
+// 필터 상태
+let selectedYears = new Set();   // 비어있으면 전체
+let rangeFrom = '';               // 'YYYY-MM' 또는 'YYYY'
+let rangeTo   = '';
+let activeTab = 'year';
+
+// ── 초기화 ────────────────────────────────────────────────────────────────
+function showState(icon, title, desc, prog) {
+  document.getElementById('resultMeta').style.display = 'none';
+  document.getElementById('loadMoreWrap').style.display = 'none';
+  document.getElementById('resultList').innerHTML = `
+    <div class="state-box">
+      <div class="state-icon">${icon}</div>
+      <div class="state-title">${title}</div>
+      <div class="state-desc">${desc}</div>
+      ${prog ? '<div class="progress-bar"><div class="progress-fill"></div></div>' : ''}
+    </div>`;
+}
+
+async function loadIndex() {
+  showState('📂','인덱스 로딩 중','데이터를 불러오는 중입니다...',true);
+  try {
+    const res = await fetch('./search_index.json');
+    if (!res.ok) throw new Error('파일 없음');
+    allData = await res.json();
+    document.getElementById('headerCount').textContent = `총 ${allData.length.toLocaleString()}건`;
+    buildYearButtons();
+    buildRangeSelects();
+    fuse = new Fuse(allData, {
+      keys:[{name:'t',weight:.40},{name:'k',weight:.45},{name:'s',weight:.15}],
+      threshold:.38, includeScore:true, includeMatches:true,
+      minMatchCharLength:2, ignoreLocation:true, limit:600
+    });
+    showDefault();
+  } catch(e) {
+    showState('⚠️','로딩 실패',`search_index.json이 같은 폴더에 있는지 확인하세요.<br><small>${e.message}</small>`,false);
+  }
+}
+
+// ── 연도 버튼 ────────────────────────────────────────────────────────────
+function buildYearButtons() {
+  const years = new Set();
+  allData.forEach(r => { if(r.d && r.d.length>=4) years.add(r.d.slice(0,4)); });
+  const sorted = [...years].sort((a,b)=>b-a);
+  const grid = document.getElementById('yearGrid');
+  sorted.forEach(y => {
+    const btn = document.createElement('button');
+    btn.className = 'year-btn';
+    btn.dataset.year = y;
+    btn.textContent = y;
+    btn.onclick = () => toggleYear(y);
+    grid.appendChild(btn);
+  });
+}
+
+function toggleYear(y) {
+  if (y === 'all') {
+    selectedYears.clear();
+  } else {
+    if (selectedYears.has(y)) selectedYears.delete(y);
+    else selectedYears.add(y);
+  }
+  syncYearButtons();
+  clearRange();
+  doSearch();
+}
+
+function syncYearButtons() {
+  const allBtn = document.querySelector('[data-year="all"]');
+  const none = selectedYears.size === 0;
+  allBtn.className = 'year-btn all-btn' + (none ? '' : ' inactive');
+  document.querySelectorAll('.year-btn:not([data-year="all"])').forEach(b => {
+    b.classList.toggle('active', selectedYears.has(b.dataset.year));
+  });
+  document.getElementById('yearClearBtn').style.display = none ? 'none' : 'inline';
+  updateFilterBar();
+}
+
+function clearYears() {
+  selectedYears.clear();
+  syncYearButtons();
+  doSearch();
+}
+
+// ── 기간 설정 ────────────────────────────────────────────────────────────
+function buildRangeSelects() {
+  const years = new Set();
+  allData.forEach(r => { if(r.d && r.d.length>=4) years.add(r.d.slice(0,4)); });
+  const sorted = [...years].sort((a,b)=>b-a);
+  ['fromYear','toYear'].forEach(id => {
+    const sel = document.getElementById(id);
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = '연도 선택';
+    sel.appendChild(ph);
+    sorted.forEach(y => {
+      const opt = document.createElement('option');
+      opt.value = y;
+      opt.textContent = y + '년';
+      sel.appendChild(opt);
+    });
+  });
+  // toYear 기본: 가장 최신
+  document.getElementById('fromYear').value = sorted[sorted.length-1] || '';
+  document.getElementById('toYear').value   = sorted[0] || '';
+}
+
+function applyRange() {
+  const fy = document.getElementById('fromYear').value;
+  const fm = document.getElementById('fromMonth').value;
+  const ty = document.getElementById('toYear').value;
+  const tm = document.getElementById('toMonth').value;
+  if (!fy || !ty) { alert('연도를 선택하세요'); return; }
+  rangeFrom = fm ? `${fy}-${fm}` : `${fy}-01`;
+  rangeTo   = tm ? `${ty}-${tm}` : `${ty}-12`;
+  if (rangeFrom > rangeTo) { alert('시작 날짜가 종료보다 늦을 수 없습니다'); return; }
+  selectedYears.clear();
+  syncYearButtons();
+  updateFilterBar();
+  doSearch();
+}
+
+function resetRange() {
+  clearRange();
+  updateFilterBar();
+  doSearch();
+}
+
+function clearRange() {
+  rangeFrom = ''; rangeTo = '';
+}
+
+function clearAllFilters() {
+  selectedYears.clear();
+  clearRange();
+  syncYearButtons();
+  updateFilterBar();
+  doSearch();
+}
+
+function updateFilterBar() {
+  const bar = document.getElementById('activeFilterBar');
+  const txt = document.getElementById('activeFilterText');
+  let msg = '';
+  if (selectedYears.size > 0) {
+    const ys = [...selectedYears].sort((a,b)=>b-a);
+    msg = `연도 필터: ${ys.join(', ')}년 (${selectedYears.size}개 선택)`;
+  } else if (rangeFrom && rangeTo) {
+    msg = `기간 필터: ${rangeFrom} ~ ${rangeTo}`;
+  }
+  if (msg) { bar.classList.add('show'); txt.textContent = msg; }
+  else      { bar.classList.remove('show'); }
+}
+
+// ── 탭 전환 ──────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.ftab').forEach((b,i) => {
+    b.classList.toggle('active', (i===0 && tab==='year') || (i===1 && tab==='range'));
+  });
+  document.getElementById('tab-year').classList.toggle('active', tab==='year');
+  document.getElementById('tab-range').classList.toggle('active', tab==='range');
+}
+
+// ── 날짜 필터 적용 ────────────────────────────────────────────────────────
+function filterByDate(items) {
+  // items: Array of {item, ...} or plain objects
+  const getDate = r => (r.item || r).d || '';
+
+  if (selectedYears.size > 0) {
+    return items.filter(r => {
+      const d = getDate(r);
+      return d && selectedYears.has(d.slice(0,4));
+    });
+  }
+  if (rangeFrom && rangeTo) {
+    const from = rangeFrom.slice(0,7); // YYYY-MM
+    const to   = rangeTo.slice(0,7);
+    return items.filter(r => {
+      const d = getDate(r).slice(0,7);
+      return d && d >= from && d <= to;
+    });
+  }
+  return items;
+}
+
+// ── 검색 ─────────────────────────────────────────────────────────────────
+let debounce;
+document.getElementById('searchInput').addEventListener('input', () => {
+  clearTimeout(debounce);
+  debounce = setTimeout(doSearch, 280);
+});
+document.getElementById('searchInput').addEventListener('keydown', e => {
+  if(e.key==='Enter'){clearTimeout(debounce);doSearch();}
+});
+
+function doSearch() {
+  if(!fuse) return;
+  const q = document.getElementById('searchInput').value.trim();
+  const sort = document.getElementById('sortSelect')?.value || 'date';
+
+  if(!q){ showDefault(); return; }
+  if(q.length < 2){ showState('✏️','두 글자 이상 입력해주세요','',false); return; }
+
+  let results = fuse.search(q);
+  results = filterByDate(results);
+  if(sort==='date') results.sort((a,b)=>(b.item.d||'')>(a.item.d||'')?1:-1);
+
+  currentResults = results;
+  displayedCount = 0;
+  renderResults(q);
+}
+
+function showDefault() {
+  const sorted = [...allData].sort((a,b)=>(b.d||'')>(a.d||'')?1:-1);
+  const wrapped = sorted.map(item=>({item}));
+  currentResults = filterByDate(wrapped);
+  displayedCount = 0;
+  renderResults('');
+}
+
+// ── 렌더링 ───────────────────────────────────────────────────────────────
+function renderResults(query) {
+  const total = currentResults.length;
+  const meta  = document.getElementById('resultMeta');
+  const countEl = document.getElementById('resultCount');
+  const listEl  = document.getElementById('resultList');
+  const moreWrap= document.getElementById('loadMoreWrap');
+
+  meta.style.display = total > 0 ? 'flex' : 'none';
+
+  if(total===0){
+    const q = document.getElementById('searchInput').value.trim();
+    showState('🔍','검색 결과가 없습니다',
+      q ? `"${escHtml(q)}"에 해당하는 보도자료가 없습니다. 다른 검색어를 시도해보세요.`
+        : '해당 기간에 보도자료가 없습니다.', false);
+    return;
+  }
+
+  const slice = currentResults.slice(0, PAGE);
+  displayedCount = slice.length;
+
+  let filterDesc = '';
+  if(selectedYears.size > 0) filterDesc = ` (${[...selectedYears].sort((a,b)=>b-a).join(', ')}년)`;
+  else if(rangeFrom && rangeTo) filterDesc = ` (${rangeFrom}~${rangeTo})`;
+
+  countEl.innerHTML = query
+    ? `"<strong>${escHtml(query)}</strong>" 검색결과 <strong>${total.toLocaleString()}</strong>건${filterDesc}`
+    : `전체 <strong>${total.toLocaleString()}</strong>건${filterDesc} (최신순)`;
+
+  listEl.innerHTML = slice.map(r=>renderCard(r, query)).join('');
+  moreWrap.style.display = total > displayedCount ? 'block' : 'none';
+  if(total > displayedCount)
+    document.getElementById('loadMoreBtn').textContent = `더 보기 (${(total-displayedCount).toLocaleString()}건 남음)`;
+}
+
+function loadMore() {
+  const q = document.getElementById('searchInput').value.trim();
+  const next = currentResults.slice(displayedCount, displayedCount + PAGE);
+  document.getElementById('resultList').insertAdjacentHTML('beforeend', next.map(r=>renderCard(r,q)).join(''));
+  displayedCount += next.length;
+  const rem = currentResults.length - displayedCount;
+  if(rem <= 0) document.getElementById('loadMoreWrap').style.display = 'none';
+  else document.getElementById('loadMoreBtn').textContent = `더 보기 (${rem.toLocaleString()}건 남음)`;
+}
+
+function renderCard(r, query) {
+  const item     = r.item || r;
+  const matches  = r.matches || [];
+  const title    = item.t || '(제목 없음)';
+  const date     = item.d || '';
+  const url      = item.u || '#';
+  const summary  = item.s || '';
+  const keywords = item.k || [];
+  const dateStr  = date ? date.replace(/-/g,'.') : '날짜 미상';
+
+  const mf = new Set(matches.map(m=>m.key));
+  const mkws = new Set();
+  if(query) keywords.forEach(kw=>{ if(kw.includes(query)) mkws.add(kw); });
+  matches.filter(m=>m.key==='k').forEach(m=>{ if(m.value) mkws.add(m.value); });
+
+  const hlT = highlight(title, query, mf.has('t'));
+  const hlS = summary ? highlight(summary, query, mf.has('s')) : '';
+  const kwHtml = keywords.slice(0,8).map(kw=>{
+    const hit = mkws.has(kw)||(query&&kw.includes(query));
+    return `<span class="kw${hit?' hit':''}">${escHtml(kw)}</span>`;
+  }).join('');
+
+  return `<div class="card">
+    <div class="card-top">
+      <span class="card-date">${dateStr}</span>
+      <span class="card-title">${hlT}</span>
+    </div>
+    ${hlS?`<div class="card-summary">${hlS}</div>`:''}
+    <div class="card-bottom">
+      <div class="card-keywords">${kwHtml}</div>
+      <a class="card-link" href="${escHtml(url)}" target="_blank" rel="noopener">원문 보기 →</a>
+    </div>
+  </div>`;
+}
+
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function highlight(text, q, should) {
+  const esc = escHtml(text);
+  if(!q||!should) return esc;
+  try{return esc.replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi'),'<mark>$1</mark>');}
+  catch{return esc;}
+}
+
+loadIndex();
+</script>
+</body>
+</html>
